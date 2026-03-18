@@ -12,7 +12,7 @@ app.use(express.json()); // Middleware to parse JSON bodies
 
 app.use(authUser)
 
-app.use('/students', studentRouter);
+
 app.use('/users', userRouter);
 app.use('/products', productRouter);
 
