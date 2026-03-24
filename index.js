@@ -3,6 +3,12 @@ import mongoose from 'mongoose';
 import userRouter from './routers/userRouter.js';
 import authUser from './middlwares/authentication.js';
 import productRouter from './routers/productRouter.js';
+import cors from 'cors';  
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const mongodbURI = process.env.MongoDB_URI;
 
 
 const app = express();
@@ -10,12 +16,12 @@ const app = express();
 app.use(express.json()); // Middleware to parse JSON bodies
 
 app.use(authUser)
-
+app.use(cors())
  
 app.use('/users', userRouter);
 app.use('/products', productRouter);
 
-const mongodbURI = "mongodb+srv://admin:1234@cluster0.pjfcnc5.mongodb.net/test1?appName=Cluster0"
+
 
 
 
