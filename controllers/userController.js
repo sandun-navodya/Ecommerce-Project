@@ -1,6 +1,8 @@
 import User from '../models/user.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';    
+dotenv.config();
 
 export async function createUser(req, res) {
 
@@ -61,7 +63,7 @@ export async function loginUser(req, res) {
 
                 }
 
-                const token = jwt.sign(payload, "computer-01-store", { expiresIn: "48h" })
+                const token = jwt.sign(payload, process.env.tokenSecret, { expiresIn: "48h" })
                 //expire 
 
                 console.log(token)

@@ -18,8 +18,8 @@ app.use(express.json()); // Middleware to parse JSON bodies
 app.use(authUser)
 app.use(cors())
  
-app.use('/users', userRouter);
-app.use('/products', productRouter);
+app.use('/api/users', userRouter);
+app.use('/api/products', productRouter);
 
 
 

@@ -1,4 +1,6 @@
 import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
+dotenv.config();
 
 export default function authUser(req, res, next) {
     const header = req.header("Authorization")
@@ -7,7 +9,7 @@ export default function authUser(req, res, next) {
         const token = header.replace("Bearer ", "")
 
         console.log(token)
-        jwt.verify(token, "computer-01-store",
+        jwt.verify(token, process.env.tokenSecret,
             (error, decoded) => {
                if(decoded==null){
                 res.json({

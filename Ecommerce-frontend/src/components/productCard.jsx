@@ -12,7 +12,7 @@ export default function ProductCard({ name, image, price }) {
       </div>
 
       {/* Product Details */}
-      <div className="flex flex-col flex-grow">
+      <div className="flex flex-col grow">
         <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
           Category
         </h3>
