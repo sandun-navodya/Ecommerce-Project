@@ -45,6 +45,7 @@ export async function createProduct(req, res) {
         brand: req.body.brand,
         model: req.body.model,
         category: req.body.category,
+        isAvailable: req.body.isAvailable,
         stock: req.body.stock
 
     })
@@ -68,8 +69,8 @@ export async function getProducts(req, res) {
             }
             else{
 
-                const product = await product.find({ isAvailable: true })
-                res.json(product)
+                const products = await product.find({ isAvailable: true })
+                res.json(products)
             }
             
         }

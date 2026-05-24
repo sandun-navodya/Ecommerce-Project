@@ -10,13 +10,16 @@ dotenv.config();
 
 const mongodbURI = process.env.MongoDB_URI;
 
-
 const app = express();
+
+app.use(cors({
+  origin: 'http://localhost:5173', // Your frontend URL
+  credentials: true
+}));
 
 app.use(express.json()); // Middleware to parse JSON bodies
 
-app.use(authUser)
-app.use(cors())
+app.use(authUser);
  
 app.use('/api/users', userRouter);
 app.use('/api/products', productRouter);

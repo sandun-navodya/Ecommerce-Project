@@ -28,9 +28,8 @@ export default function mediaUpload(file) {
                 if (response.error) {
                     reject(response.error.message);
                 } else {
-                    // For public bucket: use getPublicUrl
-                    const imageUrl = supabase.storage.from("Images").getPublicUrl(uniqueFileName).data.publicUrl;
-                    resolve(imageUrl);
+                    const publicUrl = supabase.storage.from("Images").getPublicUrl(uniqueFileName).data.publicUrl;
+                    resolve(publicUrl);
                 }
             });
         }

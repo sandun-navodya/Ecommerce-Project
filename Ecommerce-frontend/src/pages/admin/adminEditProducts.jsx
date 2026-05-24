@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import mediaUpload from "../../components/utils/mediaUpload";
 import axios from "axios";
-export default function AdminProductsPage() {
+export default function AdminEditProductsPage() {
+
+    const location = useLocation();
 
     const [productId, setProductId] = useState("");
     const [name, setName] = useState("");
@@ -16,7 +19,45 @@ export default function AdminProductsPage() {
     const [category, setCategory] = useState("");
     const [isAvailable, setIsAvailable] = useState(true);
     const [stock, setStock] = useState(0);
+
     const [isLoading, setIsLoading] = useState(false);
+
+
+    // Populate form with product data from location state
+    useEffect(() => {
+        if (location.state?.product) {
+            const product = location.state.product;
+            
+            setProductId(product.productId || "");
+            setName(product.name || "");
+            setAltNames(product.altNames?.join(",") || "");
+            setPrice(product.price || "");
+            setLabelledPrice(product.labelledPrice || "");
+            setDescription(product.description || "");
+            setBrand(product.brand || "");
+            setModel(product.model || "");
+            setCategory(product.category || "");
+            setIsAvailable(product.isAvailable !== undefined ? product.isAvailable : true);
+            setStock(product.stock || 0);
+            
+            // Load existing images
+            if (product.Images && product.Images.length > 0) {
+                const existingImages = product.Images.map((url, index) => ({
+                    file: null,
+                    preview: url,
+                    isExisting: true
+                }));
+                setImages(existingImages);
+            }
+            
+            console.log("Product loaded:", product);
+        } else {
+            toast.error("No product selected. Redirecting to products page.");
+            setTimeout(() => {
+                window.location.href = "/admin/products";
+            }, 1500);
+        }
+    }, [location, location.state?.product]);
 
     const handleAddImages = (e) => {
         const files = e.target.files;
@@ -24,7 +65,8 @@ export default function AdminProductsPage() {
             // Store File objects (not DataURLs) for proper upload to Supabase
             const newFiles = Array.from(files).map((file) => ({
                 file: file,
-                preview: URL.createObjectURL(file)
+                preview: URL.createObjectURL(file),
+                isExisting: false
             }));
             setImages(prevImages => [...prevImages, ...newFiles]);
             e.target.value = "";
@@ -33,9 +75,12 @@ export default function AdminProductsPage() {
 
     async function handleSave() {
         try {
+
+            setIsLoading(true);
             // Validation
             if (!productId.trim()) {
                 toast.error("Product ID is required.");
+                setIsLoading(false);
                 return;
             }
             if (!name.trim()) {
@@ -59,29 +104,30 @@ export default function AdminProductsPage() {
                 return;
             }
 
-            setIsLoading(true);
-
             const token = localStorage.getItem("token");
 
             if (!token) {
                 toast.error("You must be logged in to perform this action.");
-                setIsLoading(false);
                 window.location.href = "/login";
                 return;
             }
 
+            // Handle image uploads - only upload new files
             const mediaUrl = [];
-
             for (let i = 0; i < images.length; i++) {
-              
-                mediaUrl.push(mediaUpload(images[i].file));
-               
+                if (images[i].file) {
+                    // New file that needs to be uploaded
+                    mediaUrl.push(mediaUpload(images[i].file));
+                } else if (images[i].isExisting) {
+                    // Existing image - keep the URL
+                    mediaUrl.push(Promise.resolve(images[i].preview));
+                }
             }
 
             const urls = await Promise.all(mediaUrl);
-            console.log("All uploaded image URLs:", urls);
+            console.log("All image URLs:", urls);
 
-            const altNamesArray = altNames.split(",")//.map(name => name.trim()).filter(name => name !== "");
+            const altNamesArray = altNames.split(",").map(name => name.trim()).filter(name => name !== "");
 
             const productData = {
                 productId: productId,
@@ -94,49 +140,37 @@ export default function AdminProductsPage() {
                 brand: brand,
                 model: model,
                 category: category,
-                isAvailable: isAvailable,
+                isAvailable: Boolean(isAvailable),
                 stock: parseInt(stock)
             };
 
             console.log("Product data being sent:", productData);
 
-            await axios.post(`${import.meta.env.VITE_API_URL}/products`, productData, {
+            // Use PUT request to update existing product
+            await axios.put(`${import.meta.env.VITE_API_URL}/products/${productId}`, productData, {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
             });
 
-            toast.success("Product added successfully!");
-            setIsLoading(false);
-            // Reset form fields
-            setProductId("");
-            setName("");
-            setAltNames("");
-            setPrice("");
-            setLabelledPrice("");
-            setDescription("");
-            setImages([]);
-            setBrand("");
-            setModel("");
-            setCategory("");
-            setIsAvailable(true);
-            setStock(0);
+            toast.success("Product updated successfully!");
+            
+            // Redirect back to products page
+            setTimeout(() => {
+                window.location.href = "/admin/products";
+            }, 1500);
 
         } catch (error) {
             setIsLoading(false);
-            toast.error(error?.response?.data?.message || "Failed to upload images. Please try again.");
-            console.error("Error adding product:", error);
+            toast.error(error?.response?.data?.message || "Failed to update product. Please try again.");
+            console.error("Error updating product:", error);
         }
-
-
-
-
     }
     return (
         <div className="w-full h-full flex justify-center overflow-y-auto bg-white p-6 shadow-lg rounded-lg">
             <div className="w-full h-full flex flex-col ">
                 <h2 className="text-3xl font-bold mb-8 text-slate-800 text-center pb-4 border-b-4 border-blue-500">
-                    Add New Product
+                    Edit Product
                 </h2>
 
                 <form className="space-y-6 flex-1 flex flex-col" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
@@ -151,6 +185,7 @@ export default function AdminProductsPage() {
                             <input
                                 type="text"
                                 value={productId}
+                                disabled={true} // Disable editing of Product ID
                                 onChange={(e) => setProductId(e.target.value)}
                                 placeholder="Enter unique product ID"
                                 className="px-4 py-3 border-2 border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300"
@@ -353,11 +388,11 @@ export default function AdminProductsPage() {
                             disabled={isLoading}
                             className="px-8 py-3 bg-green-500 text-white font-bold rounded-lg uppercase tracking-wider transition-all duration-300 hover:bg-green-600 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex-1 md:max-w-xs m-2"
                         >
-                            {isLoading ? 'Creating...' : 'Create Product'}
+                            {isLoading ? 'Updating...' : 'Update Product'}
                         </button>
                         <button
                             type="reset"
-                            disabled={isLoading}
+                            disabled={isLoading}    
                             className="px-8 py-3 bg-slate-400 text-white font-bold rounded-lg uppercase tracking-wider transition-all duration-300 hover:bg-slate-500 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex-1 md:max-w-xs m-2"
                         >
                             Reset Form

@@ -1,34 +1,94 @@
-export default function ProductCard({ name, image, price }) {
-  return (
-    <div className="group relative bg-white border border-slate-200 p-4 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 ease-in-out flex flex-col max-w-sm">
-      
-      {/* Image Container with Hover Zoom */}
-      <div className="overflow-hidden rounded-xl bg-slate-100 aspect-square mb-4">
-        <img 
-          src={image} 
-          alt={name} 
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-      </div>
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FaShoppingCart } from 'react-icons/fa';
 
-      {/* Product Details */}
-      <div className="flex flex-col grow">
-        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
-          Category
-        </h3>
-        <h2 className="text-xl font-bold text-slate-900 mb-2 truncate">
-          {name}
-        </h2>
-        
-        <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-100">
-          <span className="text-2xl font-semibold text-slate-900">
-            ${price}
-          </span>
-          <button className="bg-slate-900 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-medium transition-colors shadow-lg shadow-slate-200">
-            Buy Now
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+export default function ProductCard({ id, name, images, image, price, stock = 0 }) {
+    const [hovered, setHovered] = useState(false);
+    
+    // Handle both single image and images array
+    const imageArray = Array.isArray(images) ? images : (image ? [image] : []);
+    const primaryImage = imageArray[0];
+    const secondaryImage = imageArray[1];
+
+    const handleAddToCart = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log(`Added ${name} to cart`);
+        // TODO: Implement add to cart functionality
+    };
+
+    return (
+        <Link to={`/products/${id}`} className="no-underline">
+            <div className="bg-white rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden h-full flex flex-col cursor-pointer transform hover:scale-105">
+                {/* Product Image */}
+                <div 
+                    className="relative h-64 bg-gray-200 overflow-hidden"
+                    onMouseEnter={() => setHovered(true)}
+                    onMouseLeave={() => setHovered(false)}
+                >
+                    {/* Primary Image */}
+                    <img 
+                        src={primaryImage} 
+                        alt={name}
+                        className={`absolute w-full h-full object-cover transition-all duration-300 ${
+                            hovered && secondaryImage ? 'opacity-0' : 'opacity-100'
+                        }`}
+                    />
+                    
+                    {/* Secondary Image on Hover */}
+                    {secondaryImage && (
+                        <img 
+                            src={secondaryImage} 
+                            alt={`${name} view 2`}
+                            className={`absolute w-full h-full object-cover transition-all duration-300 ${
+                                hovered ? 'opacity-100' : 'opacity-0'
+                            }`}
+                        />
+                    )}
+                </div>
+
+                {/* Product Info */}
+                <div className="p-4 flex flex-col flex-1">
+                    {/* Product Name */}
+                    <h3 className="text-base font-semibold text-secondary line-clamp-2 mb-3 hover:text-accent">
+                        {name}
+                    </h3>
+
+                    {/* Price */}
+                    <div className="mb-4 flex-1">
+                        <p className="text-xl font-bold text-accent">
+                            Rs. {typeof price === 'string' ? price : price?.toLocaleString()}
+                        </p>
+                    </div>
+
+                    {/* Stock Status */}
+                    <div className="mb-3">
+                        {stock > 0 ? (
+                            <span className="inline-block text-xs font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                                In Stock ({stock})
+                            </span>
+                        ) : (
+                            <span className="inline-block text-xs font-medium text-red-600 bg-red-50 px-3 py-1 rounded-full">
+                                Out of Stock
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Add to Cart Button */}
+                    <button
+                        onClick={handleAddToCart}
+                        disabled={stock === 0}
+                        className={`w-full flex items-center justify-center gap-2 py-3 px-3 rounded-lg font-medium transition-all duration-300 ${
+                            stock > 0
+                                ? 'bg-accent text-white hover:bg-orange-600 active:scale-95'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                    >
+                        <FaShoppingCart size={20} />
+                        <span className="text-sm">{stock > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
+                    </button>
+                </div>
+            </div>
+        </Link>
+    );
 }
