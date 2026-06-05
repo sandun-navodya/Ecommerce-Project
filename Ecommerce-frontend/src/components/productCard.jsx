@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 
-export default function ProductCard({ id, name, images, image, price, stock = 0 }) {
+export default function ProductCard({ id, name, images, image, price, labelledPrice, stock = 0 }) {
     const [hovered, setHovered] = useState(false);
     
     // Handle both single image and images array
@@ -56,9 +56,20 @@ export default function ProductCard({ id, name, images, image, price, stock = 0 
 
                     {/* Price */}
                     <div className="mb-4 flex-1">
-                        <p className="text-xl font-bold text-accent">
-                            Rs. {typeof price === 'string' ? price : price?.toLocaleString()}
-                        </p>
+                        {labelledPrice && labelledPrice > price ? (
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-gray-400 line-through">
+                                    Rs. {typeof labelledPrice === 'string' ? labelledPrice : labelledPrice?.toLocaleString()}
+                                </span>
+                                <p className="text-xl font-bold text-accent">
+                                    Rs. {typeof price === 'string' ? price : price?.toLocaleString()}
+                                </p>
+                            </div>
+                        ) : (
+                            <p className="text-xl font-bold text-accent">
+                                Rs. {typeof price === 'string' ? price : price?.toLocaleString()}
+                            </p>
+                        )}
                     </div>
 
                     {/* Stock Status */}

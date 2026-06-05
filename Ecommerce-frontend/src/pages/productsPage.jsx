@@ -72,6 +72,7 @@ export default function ProductsPage() {
                                     name={product.name} 
                                     images={product.Images || [product.image]}
                                     price={product.price}
+                                    labelledPrice={product.labelledPrice}
                                     stock={product.stock}
                                 />
                             </div>

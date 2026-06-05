@@ -5,7 +5,7 @@ import { FaShoppingCart, FaHeart } from 'react-icons/fa';
 import { FiChevronLeft } from 'react-icons/fi';
 
 export default function ProductDetailPage() {
-    const { id } = useParams();
+    const { productId } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -19,13 +19,14 @@ export default function ProductDetailPage() {
             setIsLoading(true);
             try {
                 const response = await axios.get(
-                    `${import.meta.env.VITE_API_URL}/products/${id}`
+                    `${import.meta.env.VITE_API_URL}/products/${productId}`
                 );
                 console.log('Product detail response:', response.data);
                 console.log('Image field:', response.data.Images?.[0] || response.data.image);
                 setProduct(response.data);
                 setError(null);
             } catch (error) {
+                toast.error(response?.data?.message || "Failed to load product details.");
                 console.error('Error fetching product:', error);
                 setError('Failed to load product details. Please try again.');
             } finally {
@@ -33,10 +34,10 @@ export default function ProductDetailPage() {
             }
         };
 
-        if (id) {
+        if (productId) {
             fetchProduct();
         }
-    }, [id]);
+    }, [productId]);
 
     const handleAddToCart = () => {
         if (product && product.stock > 0) {
@@ -105,7 +106,7 @@ export default function ProductDetailPage() {
                         
                         {/* Image Thumbnails */}
                         {product.Images && product.Images.length > 1 && (
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 ">
                                 {product.Images.map((img, idx) => (
                                     <button
                                         key={idx}
@@ -119,7 +120,7 @@ export default function ProductDetailPage() {
                                         <img 
                                             src={img} 
                                             alt={`${product.name} view ${idx + 1}`}
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-cover cursor-pointer"
                                         />
                                     </button>
                                 ))}
@@ -134,6 +135,9 @@ export default function ProductDetailPage() {
                             <h1 className="text-4xl font-bold text-secondary mb-4">
                                 {product.name}
                             </h1>
+                            <h2 className="text-xl text-gray-600 mb-6">
+                                {product.altNames?.join(' | ')} 
+                            </h2>
 
                             {/* Category */}
                             {product.category && (
@@ -262,7 +266,7 @@ export default function ProductDetailPage() {
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </div>                    
                 </div>
             </div>
         </div>

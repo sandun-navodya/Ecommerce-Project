@@ -41,7 +41,7 @@ function App() {
           } 
         />
         <Route 
-          path="/products/:id" 
+          path="/products/:productId" 
           element={
             <div className="flex flex-col h-full overflow-hidden">
               <Header />

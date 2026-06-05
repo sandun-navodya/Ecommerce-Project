@@ -155,7 +155,7 @@ export async function updateProduct(req, res) {
 export async function getProductById(req, res) {
     try {
         const productId = req.params.productId
-        const productData = await product.findOne({ productId: productId })
+        const productData = await product.findOne({  _id: productId })
 
         if (!productData) {
             return res.status(404).json({
