@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
+import { addToCart } from './utils/cart';
+import { SiQuantcast } from 'react-icons/si';
 
-export default function ProductCard({ id, name, images, image, price, labelledPrice, stock = 0 }) {
+export default function ProductCard({ id, name, images, image, price, quantity, labelledPrice, stock = 0 }) {
     const [hovered, setHovered] = useState(false);
     
     // Handle both single image and images array
@@ -10,11 +12,23 @@ export default function ProductCard({ id, name, images, image, price, labelledPr
     const primaryImage = imageArray[0];
     const secondaryImage = imageArray[1];
 
+  
+    const actualStock = quantity !== undefined ? quantity : stock;
+
     const handleAddToCart = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log(`Added ${name} to cart`);
-        // TODO: Implement add to cart functionality
+
+        const product = {
+            productId: String(id), 
+            name,
+            price,
+            labelledPrice,
+            image: primaryImage, 
+            stock: actualStock,  
+        };
+        
+        addToCart(product, 1);
     };
 
     return (
@@ -74,9 +88,9 @@ export default function ProductCard({ id, name, images, image, price, labelledPr
 
                     {/* Stock Status */}
                     <div className="mb-3">
-                        {stock > 0 ? (
+                        {actualStock > 0 ? (
                             <span className="inline-block text-xs font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                                In Stock ({stock})
+                                In Stock ({actualStock})
                             </span>
                         ) : (
                             <span className="inline-block text-xs font-medium text-red-600 bg-red-50 px-3 py-1 rounded-full">
@@ -88,15 +102,15 @@ export default function ProductCard({ id, name, images, image, price, labelledPr
                     {/* Add to Cart Button */}
                     <button
                         onClick={handleAddToCart}
-                        disabled={stock === 0}
+                        disabled={actualStock === 0}
                         className={`w-full flex items-center justify-center gap-2 py-3 px-3 rounded-lg font-medium transition-all duration-300 ${
-                            stock > 0
+                            actualStock > 0
                                 ? 'bg-accent text-white hover:bg-orange-600 active:scale-95'
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}
                     >
                         <FaShoppingCart size={20} />
-                        <span className="text-sm">{stock > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
+                        <span className="text-sm">{actualStock > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
                     </button>
                 </div>
             </div>

@@ -7,6 +7,7 @@ import HomePage from './pages/homePage'
 import ProductsPage from './pages/productsPage'
 import ProductDetailPage from './pages/productDetailPage'
 import ContactPage from './pages/contactPage'
+import CartPage from './pages/cartPage'
 import Header from './components/header'
 import Test from './components/test'
 import { Toaster } from 'react-hot-toast'
@@ -58,6 +59,17 @@ function App() {
               <Header />
               <div className="flex-1 overflow-y-auto">
                 <ContactPage />
+              </div>
+            </div>
+          } 
+        />
+        <Route 
+          path="/cart" 
+          element={
+            <div className="flex flex-col h-full overflow-hidden">
+              <Header />
+              <div className="flex-1 overflow-y-auto">
+                <CartPage />
               </div>
             </div>
           } 

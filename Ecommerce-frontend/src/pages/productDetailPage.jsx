@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaShoppingCart, FaHeart } from 'react-icons/fa';
 import { FiChevronLeft } from 'react-icons/fi';
+import { addToCart, getCart } from '../components/utils/cart.js';
+import toast from 'react-hot-toast';
 
 export default function ProductDetailPage() {
     const { productId } = useParams();
@@ -13,6 +15,8 @@ export default function ProductDetailPage() {
     const [quantity, setQuantity] = useState(1);
     const [isFavorite, setIsFavorite] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+    const productStock = product ? (product.stock !== undefined ? product.stock : product.quantity) : 0;
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -26,7 +30,7 @@ export default function ProductDetailPage() {
                 setProduct(response.data);
                 setError(null);
             } catch (error) {
-                toast.error(response?.data?.message || "Failed to load product details.");
+                toast.error("Failed to load product details.");
                 console.error('Error fetching product:', error);
                 setError('Failed to load product details. Please try again.');
             } finally {
@@ -39,22 +43,15 @@ export default function ProductDetailPage() {
         }
     }, [productId]);
 
-    const handleAddToCart = () => {
-        if (product && product.stock > 0) {
-            console.log(`Added ${quantity} of ${product.name} to cart`);
-            // TODO: Implement actual add to cart functionality
-        }
-    };
-
     const handleBuyNow = () => {
-        if (product && product.stock > 0) {
+        if (product && productStock > 0) {
             console.log(`Buy Now: ${quantity} of ${product.name}`);
             // TODO: Implement buy now functionality (direct checkout)
         }
     };
 
     const handleQuantityChange = (value) => {
-        if (value > 0 && value <= (product?.stock || 0)) {
+        if (value > 0 && value <= productStock) {
             setQuantity(value);
         }
     };
@@ -146,7 +143,7 @@ export default function ProductDetailPage() {
                                 {product.altNames?.join(' | ')} 
                             </h2>
                             <p className="text-sm text-gray-600 mb-4">
-                                Item ID: {product.productId}
+                                Item ID: {product.productId || product.id || productId}
                             </p>
 
                             {/* Category */}
@@ -212,9 +209,9 @@ export default function ProductDetailPage() {
                         <div className="border-t border-gray-200 pt-6">
                             {/* Stock Status */}
                             <div className="mb-6">
-                                {product.stock > 0 ? (
+                                {productStock > 0 ? (
                                     <span className="inline-block bg-green-50 text-green-600 px-4 py-2 rounded-lg font-medium">
-                                        In Stock ({product.stock} available)
+                                        In Stock ({productStock} available)
                                     </span>
                                 ) : (
                                     <span className="inline-block bg-red-50 text-red-600 px-4 py-2 rounded-lg font-medium">
@@ -224,7 +221,7 @@ export default function ProductDetailPage() {
                             </div>
 
                             {/* Quantity Selector */}
-                            {product.stock > 0 && (
+                            {productStock > 0 && (
                                 <div className="mb-6">
                                     <label className="block text-sm font-medium text-secondary mb-2">
                                         Quantity:
@@ -241,7 +238,7 @@ export default function ProductDetailPage() {
                                             value={quantity}
                                             onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
                                             min="1"
-                                            max={product.stock}
+                                            max={productStock}
                                             className="border border-gray-300 w-16 text-center px-2 py-2 rounded"
                                         />
                                         <button
@@ -257,28 +254,38 @@ export default function ProductDetailPage() {
                             {/* Buttons */}
                             <div className="flex gap-4">
                                 <button
-                                    onClick={handleAddToCart}
-                                    disabled={product.stock === 0}
+                                    onClick={() => {
+                                        
+                                        const finalId = product._id || product.id || productId;
+                                        const prodToSave = { 
+                                            ...product, 
+                                            productId: finalId, 
+                                            stock: productStock 
+                                        };
+                                        addToCart(prodToSave, quantity);
+                                        
+                                    }}
+                                    disabled={productStock === 0}
                                     className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300 ${
-                                        product.stock > 0
+                                        productStock > 0
                                             ? 'bg-accent hover:bg-orange-600 active:scale-95'
                                             : 'bg-gray-400 cursor-not-allowed'
                                     }`}
                                 >
                                     <FaShoppingCart size={20} />
-                                    {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                                    {productStock > 0 ? 'Add to Cart' : 'Out of Stock'}
                                 </button>
 
                                 <button
                                     onClick={handleBuyNow}
-                                    disabled={product.stock === 0}
+                                    disabled={productStock === 0}
                                     className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300 ${
-                                        product.stock > 0
+                                        productStock > 0
                                             ? 'bg-green-600 hover:bg-green-700 active:scale-95'
                                             : 'bg-gray-400 cursor-not-allowed'
                                     }`}
                                 >
-                                    {product.stock > 0 ? 'Buy Now' : 'Out of Stock'}
+                                    {productStock > 0 ? 'Buy Now' : 'Out of Stock'}
                                 </button>
 
                                 <button
