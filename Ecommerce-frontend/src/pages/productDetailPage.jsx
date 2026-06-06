@@ -46,6 +46,13 @@ export default function ProductDetailPage() {
         }
     };
 
+    const handleBuyNow = () => {
+        if (product && product.stock > 0) {
+            console.log(`Buy Now: ${quantity} of ${product.name}`);
+            // TODO: Implement buy now functionality (direct checkout)
+        }
+    };
+
     const handleQuantityChange = (value) => {
         if (value > 0 && value <= (product?.stock || 0)) {
             setQuantity(value);
@@ -135,9 +142,12 @@ export default function ProductDetailPage() {
                             <h1 className="text-4xl font-bold text-secondary mb-4">
                                 {product.name}
                             </h1>
-                            <h2 className="text-xl text-gray-600 mb-6">
+                            <h2 className="text-lg text-gray-600 mb-2">
                                 {product.altNames?.join(' | ')} 
                             </h2>
+                            <p className="text-sm text-gray-600 mb-4">
+                                Item ID: {product.productId}
+                            </p>
 
                             {/* Category */}
                             {product.category && (
@@ -161,6 +171,11 @@ export default function ProductDetailPage() {
                                 <p className="text-5xl font-bold text-accent">
                                     Rs. {typeof product.price === 'string' ? product.price : product.price?.toLocaleString()}
                                 </p>
+                                {product.labelledPrice && product.labelledPrice > product.price && (
+                                    <p className="text-2lg font-semibold text-gray-400 line-through">
+                                        Rs. {typeof product.labelledPrice === 'string' ? product.labelledPrice : product.labelledPrice?.toLocaleString()}
+                                    </p>
+                                )}
                             </div>
 
                             {/* Description */}
@@ -252,6 +267,18 @@ export default function ProductDetailPage() {
                                 >
                                     <FaShoppingCart size={20} />
                                     {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                                </button>
+
+                                <button
+                                    onClick={handleBuyNow}
+                                    disabled={product.stock === 0}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300 ${
+                                        product.stock > 0
+                                            ? 'bg-green-600 hover:bg-green-700 active:scale-95'
+                                            : 'bg-gray-400 cursor-not-allowed'
+                                    }`}
+                                >
+                                    {product.stock > 0 ? 'Buy Now' : 'Out of Stock'}
                                 </button>
 
                                 <button
