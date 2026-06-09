@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaShoppingCart, FaHeart } from 'react-icons/fa';
 import { FiChevronLeft } from 'react-icons/fi';
@@ -46,7 +46,6 @@ export default function ProductDetailPage() {
     const handleBuyNow = () => {
         if (product && productStock > 0) {
             console.log(`Buy Now: ${quantity} of ${product.name}`);
-            // TODO: Implement buy now functionality (direct checkout)
         }
     };
 
@@ -107,7 +106,7 @@ export default function ProductDetailPage() {
                                 className="w-full h-96 object-cover"
                             />
                         </div>
-                        
+
                         {/* Image Thumbnails */}
                         {product.Images && product.Images.length > 1 && (
                             <div className="flex gap-2 ">
@@ -115,14 +114,13 @@ export default function ProductDetailPage() {
                                     <button
                                         key={idx}
                                         onClick={() => setSelectedImageIndex(idx)}
-                                        className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                                            selectedImageIndex === idx 
-                                                ? 'border-accent' 
-                                                : 'border-gray-300 hover:border-accent'
-                                        }`}
+                                        className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === idx
+                                            ? 'border-accent'
+                                            : 'border-gray-300 hover:border-accent'
+                                            }`}
                                     >
-                                        <img 
-                                            src={img} 
+                                        <img
+                                            src={img}
                                             alt={`${product.name} view ${idx + 1}`}
                                             className="w-full h-full object-cover cursor-pointer"
                                         />
@@ -140,10 +138,10 @@ export default function ProductDetailPage() {
                                 {product.name}
                             </h1>
                             <h2 className="text-lg text-gray-600 mb-2">
-                                {product.altNames?.join(' | ')} 
+                                {product.altNames?.join(' | ')}
                             </h2>
                             <p className="text-sm text-gray-600 mb-4">
-                                Item ID: {product.productId || product.id || productId}
+                                Item ID: {product.productId || productId}
                             </p>
 
                             {/* Category */}
@@ -182,25 +180,6 @@ export default function ProductDetailPage() {
                                     <p className="text-gray-700 leading-relaxed">
                                         {product.description}
                                     </p>
-                                </div>
-                            )}
-
-                            {/* Specifications */}
-                            {product.specifications && (
-                                <div className="mb-6">
-                                    <h3 className="text-lg font-semibold text-secondary mb-3">Specifications</h3>
-                                    <ul className="space-y-2 text-gray-700">
-                                        {typeof product.specifications === 'string' ? (
-                                            <li>{product.specifications}</li>
-                                        ) : (
-                                            Object.entries(product.specifications).map(([key, value]) => (
-                                                <li key={key} className="flex justify-between">
-                                                    <span className="font-medium">{key}:</span>
-                                                    <span>{value}</span>
-                                                </li>
-                                            ))
-                                        )}
-                                    </ul>
                                 </div>
                             )}
                         </div>
@@ -255,46 +234,54 @@ export default function ProductDetailPage() {
                             <div className="flex gap-4">
                                 <button
                                     onClick={() => {
-                                        
-                                        const finalId = product._id || product.id || productId;
-                                        const prodToSave = { 
-                                            ...product, 
-                                            productId: finalId, 
-                                            stock: productStock 
+                                        const finalId = product.productId || productId;
+                                        const prodToSave = {
+                                            ...product,
+                                            productId: finalId,
+                                            stock: productStock
                                         };
                                         addToCart(prodToSave, quantity);
-                                        
+                                       
                                     }}
                                     disabled={productStock === 0}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300 ${
-                                        productStock > 0
-                                            ? 'bg-accent hover:bg-orange-600 active:scale-95'
-                                            : 'bg-gray-400 cursor-not-allowed'
-                                    }`}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300 ${productStock > 0
+                                        ? 'bg-accent hover:bg-orange-600 active:scale-95'
+                                        : 'bg-gray-400 cursor-not-allowed'
+                                        }`}
                                 >
                                     <FaShoppingCart size={20} />
                                     {productStock > 0 ? 'Add to Cart' : 'Out of Stock'}
                                 </button>
 
-                                <button
-                                    onClick={handleBuyNow}
-                                    disabled={productStock === 0}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300 ${
-                                        productStock > 0
+                                <Link
+                                    to={productStock > 0 ? "/checkout" : "#"}
+                                    state={[
+                                        {
+                                            product: {
+                                                ...product,
+                                                productId: product.productId || productId,
+                                                price: product.price,
+                                                image: product.Images?.[selectedImageIndex] || product.image,
+                                                stock: productStock
+                                            },
+                                            quantity: quantity
+                                        }
+                                    ]}
+                                    onClick={(e) => productStock === 0 && e.preventDefault()}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300 ${productStock > 0
                                             ? 'bg-green-600 hover:bg-green-700 active:scale-95'
-                                            : 'bg-gray-400 cursor-not-allowed'
-                                    }`}
+                                            : 'bg-gray-400 cursor-not-allowed pointer-events-none'
+                                        }`}
                                 >
                                     {productStock > 0 ? 'Buy Now' : 'Out of Stock'}
-                                </button>
+                                </Link>
 
                                 <button
                                     onClick={() => setIsFavorite(!isFavorite)}
-                                    className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 border-2 ${
-                                        isFavorite
-                                            ? 'border-accent text-accent bg-orange-50'
-                                            : 'border-gray-300 text-gray-600 hover:border-accent hover:text-accent'
-                                    }`}
+                                    className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 border-2 ${isFavorite
+                                        ? 'border-accent text-accent bg-orange-50'
+                                        : 'border-gray-300 text-gray-600 hover:border-accent hover:text-accent'
+                                        }`}
                                 >
                                     <FaHeart size={20} style={{ opacity: isFavorite ? 1 : 0.4 }} />
                                 </button>

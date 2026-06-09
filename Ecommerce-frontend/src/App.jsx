@@ -8,6 +8,7 @@ import ProductsPage from './pages/productsPage'
 import ProductDetailPage from './pages/productDetailPage'
 import ContactPage from './pages/contactPage'
 import CartPage from './pages/cartPage'
+import CheckoutPage from './pages/checkoutPage'
 import Header from './components/header'
 import Test from './components/test'
 import { Toaster } from 'react-hot-toast'
@@ -73,7 +74,23 @@ function App() {
               </div>
             </div>
           } 
+
         />
+
+        <Route 
+          path="/checkout" 
+          element={
+            <div className="flex flex-col h-full overflow-hidden">
+              <Header />
+              <div className="flex-1 overflow-y-auto">
+                <CheckoutPage />
+              </div>
+            </div>
+          } 
+
+          
+        />
+      
         
         {/* Pages without Header */}
         <Route path="/admin/*" element={<AdminPage/>} />

@@ -45,13 +45,13 @@ export default function ProductsPage() {
         <div className="w-full bg-primary text-secondary p-8">
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-4xl font-bold mb-2 text-secondary">Our Products</h1>
-                
+
                 {error && (
                     <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
                         <p className="text-sm">{error}</p>
                     </div>
                 )}
-                
+
                 {products.length === 0 && !error ? (
                     <div className="text-center py-12">
                         <p className="text-xl text-gray-500">No products available.</p>
@@ -67,13 +67,15 @@ export default function ProductsPage() {
                                         </span>
                                     </div>
                                 )}
-                                <ProductCard 
-                                    id={product._id || product.id || product.productId}
-                                    name={product.name} 
-                                    images={product.Images || [product.image]}
+                                <ProductCard
+                                    key={product._id}
+                                    id={product._id}
+                                    productId={product.productId}
+                                    name={product.name}
                                     price={product.price}
+                                    stock={product.stock} 
                                     labelledPrice={product.labelledPrice}
-                                    stock={product.stock}
+                                    images={product.Images}
                                 />
                             </div>
                         ))}
@@ -83,4 +85,3 @@ export default function ProductsPage() {
         </div>
     );
 }
-              

@@ -11,14 +11,16 @@ export default function authUser(req, res, next) {
         console.log(token)
         jwt.verify(token, process.env.tokenSecret,
             (error, decoded) => {
-               if(decoded==null){
-                res.json({
-                    message:"Invalid token.Please login again"
-                })
-               }else{
-                req.user=decoded
-                next()
-               }
+                if (decoded == null) {
+
+                    res.status(401)
+                    res.json({
+                        message: "Invalid token.Please login again"
+                    })
+                } else {
+                    req.user = decoded
+                    next()
+                }
             }
         )
     }

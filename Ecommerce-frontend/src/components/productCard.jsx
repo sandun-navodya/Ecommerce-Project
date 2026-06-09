@@ -4,7 +4,7 @@ import { FaShoppingCart } from 'react-icons/fa';
 import { addToCart } from './utils/cart';
 import { SiQuantcast } from 'react-icons/si';
 
-export default function ProductCard({ id, name, images, image, price, quantity, labelledPrice, stock = 0 }) {
+export default function ProductCard({ id, productId, name, images, image, price, quantity, labelledPrice, stock = 0 }) {
     const [hovered, setHovered] = useState(false);
     
     // Handle both single image and images array
@@ -12,15 +12,15 @@ export default function ProductCard({ id, name, images, image, price, quantity, 
     const primaryImage = imageArray[0];
     const secondaryImage = imageArray[1];
 
-  
-    const actualStock = quantity !== undefined ? quantity : stock;
+    // 🌟 නිවැරදි කිරීම: Backend එකෙන් එන 'stock' මුලින්ම ගන්නවා, ඒක නැත්නම් 'quantity' Prop එක බලනවා
+    const actualStock = stock !== 0 && stock !== undefined ? stock : (quantity !== undefined ? quantity : 0);
 
     const handleAddToCart = (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         const product = {
-            productId: String(id), 
+            productId: productId || id, // 🌟 'MON-VG-27' වැනි string කේතයම යවනවා
             name,
             price,
             labelledPrice,
@@ -32,7 +32,7 @@ export default function ProductCard({ id, name, images, image, price, quantity, 
     };
 
     return (
-        <Link to={`/products/${id}`} className="no-underline">
+        <Link to={`/products/${productId || id}`} className="no-underline">
             <div className="bg-white rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden h-full flex flex-col cursor-pointer transform hover:scale-105">
                 {/* Product Image */}
                 <div 

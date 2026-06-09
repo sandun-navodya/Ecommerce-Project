@@ -1,18 +1,26 @@
 import { useState, useEffect } from "react";
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FiChevronLeft } from 'react-icons/fi';
 import { FaTrash } from 'react-icons/fa';
 import { getCart, addToCart, removeFromCart } from "../components/utils/cart";
+import CreateOrderModel from "../components/createOrderModel";
 
-export default function CartPage() {
-    const [cartItems, setCartItems] = useState([]);
+export default function CheckoutPage() {
+    const location = useLocation();
+
+    // 1. Check if user came from "Buy Now" direct link
+    const isDirectCheckout = !!(location.state && Array.isArray(location.state));
+
+    const [cartItems, setCartItems] = useState(isDirectCheckout ? location.state : []);
     const [isLoading, setIsLoading] = useState(true);
-
 
     const loadCart = () => {
         try {
-            const cart = getCart();
-            setCartItems(cart);
+            // ONLY read from local storage if it is NOT a direct checkout
+            if (!isDirectCheckout) {
+                const cart = getCart();
+                setCartItems(cart);
+            }
         } catch (error) {
             console.error("Error loading cart:", error);
             setCartItems([]);
@@ -21,32 +29,48 @@ export default function CartPage() {
         }
     };
 
-    // Load cart from localStorage on mount
     useEffect(() => {
         loadCart();
     }, []);
 
-    // Remove item from cart
+    // 2. Fix Remove Item for both Cart and Buy Now
     const handleRemoveItem = (productId) => {
+        if (isDirectCheckout) {
 
-        removeFromCart(productId);
+            setCartItems([]);
+        } else {
 
-        loadCart();
+            removeFromCart(productId);
+            loadCart();
+        }
     };
 
-    // Update quantity
+
     const handleQuantityChange = (productId, newQuantity) => {
         const currentItem = cartItems.find(item => String(item.product.productId) === String(productId));
         if (!currentItem) return;
 
-        const difference = newQuantity - currentItem.quantity;
 
+        const maxStock = currentItem.product.stock || 99;
+        if (newQuantity < 1 || newQuantity > maxStock) return;
 
-        addToCart(currentItem.product, difference);
-        loadCart();
+        if (isDirectCheckout) {
+
+            setCartItems(prevItems =>
+                prevItems.map(item =>
+                    String(item.product.productId) === String(productId)
+                        ? { ...item, quantity: newQuantity }
+                        : item
+                )
+            );
+        } else {
+
+            const difference = newQuantity - currentItem.quantity;
+            addToCart(currentItem.product, difference);
+            loadCart();
+        }
     };
 
-    // Calculate subtotal
     const calculateSubtotal = () => {
         return cartItems.reduce((total, item) => {
             const price = typeof item.product.price === 'string'
@@ -56,7 +80,6 @@ export default function CartPage() {
         }, 0);
     };
 
-    // Calculate total items
     const getTotalItems = () => {
         return cartItems.reduce((total, item) => total + item.quantity, 0);
     };
@@ -114,7 +137,9 @@ export default function CartPage() {
                     Back to Products
                 </Link>
 
-                <h1 className="text-4xl font-bold text-secondary mb-8">Shopping Cart</h1>
+                <h1 className="text-4xl font-bold text-secondary mb-8">
+                    {isDirectCheckout ? "Checkout" : "Shopping Cart"}
+                </h1>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Cart Items */}
@@ -139,7 +164,6 @@ export default function CartPage() {
                                             {item.product.image && (
                                                 <img
                                                     src={item.product.image}
-                                                    srcSet=""
                                                     alt={item.product.name}
                                                     className="w-20 h-20 object-cover rounded"
                                                 />
@@ -180,11 +204,6 @@ export default function CartPage() {
                                             <p className="font-semibold text-secondary">
                                                 Rs. {typeof item.product.price === 'string' ? item.product.price : item.product.price?.toLocaleString()}
                                             </p>
-                                            {item.product.labelledPrice && item.product.labelledPrice > item.product.price && (
-                                                <p className="text-sm text-gray-400 line-through">
-                                                    Rs. {typeof item.product.labelledPrice === 'string' ? item.product.labelledPrice : item.product.labelledPrice?.toLocaleString()}
-                                                </p>
-                                            )}
                                         </div>
 
                                         {/* Total & Remove */}
@@ -220,10 +239,6 @@ export default function CartPage() {
                                     <span>Shipping:</span>
                                     <span className="text-green-600 font-medium">FREE</span>
                                 </div>
-                                <div className="flex justify-between text-gray-700">
-                                    <span>Tax:</span>
-                                    <span>Rs. 0</span>
-                                </div>
                             </div>
 
                             <div className="flex justify-between font-bold text-lg mb-6">
@@ -231,12 +246,10 @@ export default function CartPage() {
                                 <span className="text-accent text-2xl">Rs. {calculateTotal().toLocaleString()}</span>
                             </div>
 
-                            <Link
-                                to="/checkout" state={cartItems}
-                                className="block text-center w-full bg-accent hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition duration-300 mb-3"
-                            >
-                                Proceed to Checkout
-                            </Link>
+                         
+                               <CreateOrderModel cartItems={cartItems} loadCart={loadCart} />
+                      
+
 
                             <Link
                                 to="/products"
@@ -245,11 +258,13 @@ export default function CartPage() {
                                 Continue Shopping
                             </Link>
 
-                            {/* Cart Stats */}
-                            <div className="mt-6 pt-6 border-t border-gray-200 text-sm text-gray-600">
-                                <p className="mb-2">Items in cart: <span className="font-bold text-secondary">{cartItems.length}</span></p>
-                                <p>Total quantity: <span className="font-bold text-secondary">{getTotalItems()}</span></p>
-                            </div>
+                            {/* 4. Cart Stats Section (Conditional Render) */}
+                            {!isDirectCheckout && (
+                                <div className="mt-6 pt-6 border-t border-gray-200 text-sm text-gray-600">
+                                    <p className="mb-2">Items in cart: <span className="font-bold text-secondary">{cartItems.length}</span></p>
+                                    <p>Total quantity: <span className="font-bold text-secondary">{getTotalItems()}</span></p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

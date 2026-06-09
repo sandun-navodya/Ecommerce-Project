@@ -1,85 +1,76 @@
 import product from "../models/products.js";
 import { isAdmin } from "./userController.js";
 
-
 export async function createProduct(req, res) {
-
+    // 1. මුලින්ම Admin කෙනෙක්ද කියා පරික්ෂා කිරීම
     if (!isAdmin(req.user)) {
         res.status(403).json({
             message: "Only admins can create products"
-        })
-        return
+        });
+        return;
     }
 
-
-
     try {
+        // 2. දැනටමත් මෙම productId එකෙන් භාණ්ඩයක් තියෙනවාදැයි බැලීම
         const existingProduct = await product.findOne({
             productId: req.body.productId
-        })
+        });
 
+        // 🌟 නිවැරදි කිරීම: දැනටමත් තිබේ නම්, මෙතනින්ම රෙස්පොන්ස් එක දීලා ෆන්ක්ෂන් එක නවත්වනවා (පල්ලෙහා ඒවා රන් වෙන්නේ නැත)
         if (existingProduct != null) {
             res.status(400).json({
                 message: "Product with the same productId already exists"
-            })
-            return
+            });
+            return; 
         }
 
-    }
-    catch (err) {
+        // 3. කලින් එකක් නොතිබුණේ නම් පමණක් අලුත් භාණ්ඩය නිර්මාණය කිරීම
+        const newProduct = new product({
+            productId: req.body.productId,
+            name: req.body.name,
+            altNames: req.body.altNames,
+            price: req.body.price,
+            labelledPrice: req.body.labelledPrice,
+            description: req.body.description,
+            Images: req.body.Images,
+            brand: req.body.brand,
+            model: req.body.model,
+            category: req.body.category,
+            isAvailable: req.body.isAvailable,
+            stock: req.body.stock
+        });
+
+        // 4. ඩේටාබේස් එකට සේව් කිරීම
+        await newProduct.save();
+
+        res.status(201).json({
+            message: "Product created successfully",
+            product: newProduct
+        });
+
+    } catch (err) {
+        // 5. මොකක් හරි දෝෂයක් ආවොත් කැච් එකෙන් අල්ලනවා
         res.status(500).json({
             message: "An error occurred while creating the product",
             error: err.message
-        })
+        });
     }
-
-
-    const newProduct = new product({
-        productId: req.body.productId,
-        name: req.body.name,
-        altNames: req.body.altNames,
-        price: req.body.price,
-        labelledPrice: req.body.labelledPrice,
-        description: req.body.description,
-        Images: req.body.Images,
-        brand: req.body.brand,
-        model: req.body.model,
-        category: req.body.category,
-        isAvailable: req.body.isAvailable,
-        stock: req.body.stock
-
-    })
-
-    await newProduct.save()
-
-    res.status(201).json({
-        message: "Product created successfully",
-        product: newProduct
-    })
-
 }
 
 export async function getProducts(req, res) {
-    {
-        try {
-            
-            if (isAdmin(req.user)) {
-                const products = await product.find()
-                res.json(products)
-            }
-            else{
-
-                const products = await product.find({ isAvailable: true })
-                res.json(products)
-            }
-            
+    try {
+        if (isAdmin(req.user)) {
+            const products = await product.find();
+            res.json(products);
+        } else {
+            const products = await product.find({ isAvailable: true });
+            res.json(products);
         }
-        catch (err) {
-            res.status(500).json({
-                message: "An error occurred while fetching products",
-                error: err.message
-            })
-        }
+    } catch (err) {
+        res.status(500).json({
+            message: "An error occurred while fetching products",
+            error: err.message
+        });
     }
 }
 
@@ -87,8 +78,8 @@ export async function deleteProduct(req, res) {
     if (!isAdmin(req.user)) {
         res.status(403).json({
             message: "Only admins can delete products"
-        })
-        return
+        });
+        return;
     }
     try {
         const deletedProduct = await product.findOneAndDelete({
@@ -105,12 +96,11 @@ export async function deleteProduct(req, res) {
             message: "Product deleted successfully",
             product: deletedProduct
         });
-    }
-    catch (err) {
+    } catch (err) {
         res.status(500).json({
             message: "An error occurred while deleting the product",
             error: err.message
-        })
+        });
     }
 }
 
@@ -118,14 +108,12 @@ export async function updateProduct(req, res) {
     if (!isAdmin(req.user)) {
         res.status(403).json({
             message: "Only admins can update products"
-        })
-        return
+        });
+        return;
     }   
     try {
        await product.findOneAndUpdate(
-            {
-                productId: req.params.productId     
-            },
+            { productId: req.params.productId },
             {
                 name: req.body.name,
                 altNames: req.body.altNames,
@@ -139,48 +127,46 @@ export async function updateProduct(req, res) {
                 stock: req.body.stock,
                 isAvailable: req.body.isAvailable
             }
-       )
+       );
        res.json({
-        message: "Product updated successfully"
-       })
-        
+            message: "Product updated successfully"
+       });
     } catch (err) {
         res.status(500).json({
             message: "An error occurred while updating the product",
             error: err.message
-        })
+        });
     }       
 }
 
 export async function getProductById(req, res) {
     try {
-        const productId = req.params.productId
-        const productData = await product.findOne({  _id: productId })
+        const paramId = req.params.productId;
+        // _id වෙනුවට 'productId' (String කේතය) මඟින් සොයයි
+        const productData = await product.findOne({ productId: paramId });
 
         if (!productData) {
             return res.status(404).json({
                 message: "Product not found"
-            })
+            });
         }   
         if (productData.isAvailable){
-            res.json(productData)
+            res.json(productData);
         }   
         else {
-
             if (isAdmin(req.user)) {
-                res.json(productData)
-                return
-            }
-            else{
+                res.json(productData);
+                return;
+            } else {
                 res.status(403).json({
                     message: "You are not authorized to view this product"
-                })
+                });
             }
         }
     } catch (err) {
         res.status(500).json({
             message: "An error occurred while fetching the product",
             error: err.message
-        })
+        });
     }   
 }

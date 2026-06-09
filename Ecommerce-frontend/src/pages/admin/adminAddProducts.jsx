@@ -2,8 +2,8 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import mediaUpload from "../../components/utils/mediaUpload";
 import axios from "axios";
-export default function AdminProductsPage() {
 
+export default function AdminProductsPage() {
     const [productId, setProductId] = useState("");
     const [name, setName] = useState("");
     const [altNames, setAltNames] = useState("");
@@ -21,7 +21,6 @@ export default function AdminProductsPage() {
     const handleAddImages = (e) => {
         const files = e.target.files;
         if (files && files.length > 0) {
-            // Store File objects (not DataURLs) for proper upload to Supabase
             const newFiles = Array.from(files).map((file) => ({
                 file: file,
                 preview: URL.createObjectURL(file)
@@ -30,6 +29,14 @@ export default function AdminProductsPage() {
             e.target.value = "";
         }
     };
+
+    const mediaUrl = [];
+
+    // for (let i = 0; i < images.length; i++) {
+    //     // ❌ මෙන්න මෙතනයි අවුල!
+    //     mediaUrl.push(mediaUpload(images[i].file)); 
+    // }
+    // const urls = await Promise.all(mediaUrl);
 
     async function handleSave() {
         try {
@@ -62,7 +69,6 @@ export default function AdminProductsPage() {
             setIsLoading(true);
 
             const token = localStorage.getItem("token");
-
             if (!token) {
                 toast.error("You must be logged in to perform this action.");
                 setIsLoading(false);
@@ -70,25 +76,24 @@ export default function AdminProductsPage() {
                 return;
             }
 
-            const mediaUrl = [];
 
-            for (let i = 0; i < images.length; i++) {
-              
-                mediaUrl.push(mediaUpload(images[i].file));
-               
-            }
+            const uploadPromises = images.map(img => mediaUpload(img.file));
 
-            const urls = await Promise.all(mediaUrl);
+
+            const urls = await Promise.all(uploadPromises);
             console.log("All uploaded image URLs:", urls);
 
-            const altNamesArray = altNames.split(",")//.map(name => name.trim()).filter(name => name !== "");
+
+            const altNamesArray = altNames.split(",")
+                .map(name => name.trim())
+                .filter(name => name !== "");
 
             const productData = {
                 productId: productId,
                 name: name,
                 altNames: altNamesArray,
                 price: parseFloat(price),
-                labelledPrice: parseFloat(labelledPrice),
+                labelledPrice: labelledPrice ? parseFloat(labelledPrice) : 0,
                 description: description,
                 Images: urls,
                 brand: brand,
@@ -108,6 +113,7 @@ export default function AdminProductsPage() {
 
             toast.success("Product added successfully!");
             setIsLoading(false);
+
             // Reset form fields
             setProductId("");
             setName("");
@@ -124,14 +130,11 @@ export default function AdminProductsPage() {
 
         } catch (error) {
             setIsLoading(false);
-            toast.error(error?.response?.data?.message || "Failed to upload images. Please try again.");
+            toast.error(error?.response?.data?.message || "Failed to add product. Please try again.");
             console.error("Error adding product:", error);
         }
-
-
-
-
     }
+
     return (
         <div className="w-full h-full flex justify-center overflow-y-auto bg-white p-6 shadow-lg rounded-lg">
             <div className="w-full h-full flex flex-col ">
@@ -142,7 +145,6 @@ export default function AdminProductsPage() {
                 <form className="space-y-6 flex-1 flex flex-col" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
                     {/* Grid Layout for Form Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-
                         {/* Product ID */}
                         <div className="flex flex-col gap-2">
                             <label className="text-slate-700 font-semibold text-sm uppercase tracking-wider">
@@ -278,7 +280,7 @@ export default function AdminProductsPage() {
                         </div>
                     </div>
 
-                    {/* Description - Full Width */}
+                    {/* Description */}
                     <div className="flex flex-col gap-2">
                         <label className="text-slate-700 font-semibold text-sm uppercase tracking-wider">
                             Description
@@ -289,11 +291,10 @@ export default function AdminProductsPage() {
                             placeholder="Enter product description"
                             rows="4"
                             className="px-4 py-3 border-2 border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 resize-vertical min-h-24"
-
                         ></textarea>
                     </div>
 
-                    {/* Alternative Names - Full Width */}
+                    {/* Alternative Names */}
                     <div className="flex flex-col gap-2">
                         <label className="text-slate-700 font-semibold text-sm uppercase tracking-wider">
                             Alternative Names
@@ -307,7 +308,7 @@ export default function AdminProductsPage() {
                         />
                     </div>
 
-                    {/* Images - Full Width */}
+                    {/* Images */}
                     <div className="flex flex-col gap-2 ">
                         <label className="text-slate-700 font-semibold text-sm uppercase tracking-wider">
                             Product Images

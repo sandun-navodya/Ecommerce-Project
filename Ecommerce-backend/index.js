@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import userRouter from './routers/userRouter.js';
 import authUser from './middlwares/authentication.js';
 import productRouter from './routers/productRouter.js';
+import orderRouter from './routers/orderRouter.js';
 import cors from 'cors';  
 import dotenv from 'dotenv';
 
@@ -23,6 +24,8 @@ app.use(authUser);
  
 app.use('/api/users', userRouter);
 app.use('/api/products', productRouter);
+app.use('/api/orders', orderRouter);
+
 
 
 
