@@ -11,12 +11,12 @@ export async function createProduct(req, res) {
     }
 
     try {
-        // 2. දැනටමත් මෙම productId එකෙන් භාණ්ඩයක් තියෙනවාදැයි බැලීම
+        
         const existingProduct = await product.findOne({
             productId: req.body.productId
         });
 
-        // 🌟 නිවැරදි කිරීම: දැනටමත් තිබේ නම්, මෙතනින්ම රෙස්පොන්ස් එක දීලා ෆන්ක්ෂන් එක නවත්වනවා (පල්ලෙහා ඒවා රන් වෙන්නේ නැත)
+        
         if (existingProduct != null) {
             res.status(400).json({
                 message: "Product with the same productId already exists"
@@ -142,7 +142,7 @@ export async function updateProduct(req, res) {
 export async function getProductById(req, res) {
     try {
         const paramId = req.params.productId;
-        // _id වෙනුවට 'productId' (String කේතය) මඟින් සොයයි
+
         const productData = await product.findOne({ productId: paramId });
 
         if (!productData) {

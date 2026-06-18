@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-// 🌟 වෙනස් කළ ස්ථානය: 'props' එක සාමාන්‍ය පරිදි ගන්නවා, පරණ කෝඩ් එක බිඳෙන්නේ නැති වෙන්න
+
 export default function CreateOrderModel(props) {
     const [ismodelOpen, setIsModelOpen] = useState(false);
     const [firstName, setFirstName] = useState("");
@@ -15,8 +15,7 @@ export default function CreateOrderModel(props) {
     const [postalCode, setPostalCode] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // 🌟 ආරක්ෂිතව cartItems ලබා ගැනීම: 
-    // props.cartItems තිබ්බොත් ඒක ගන්නවා, නැත්නම් props.products ගන්නවා, ඒකත් නැත්නම් හිස් array [] එකක් ගන්නවා
+    
     const itemsInCart = props.cartItems || props.products || props.state || [];
 
     const handlePlaceOrder = async (e) => {
@@ -27,7 +26,7 @@ export default function CreateOrderModel(props) {
             return;
         }
 
-        // 🌟 'cartItems.length' වෙනුවට ආරක්ෂිත 'itemsInCart.length' පාවිච්චි කරනවා
+        
         if (itemsInCart.length === 0) {
             toast.error("Your cart is empty.");
             return;
@@ -43,7 +42,7 @@ export default function CreateOrderModel(props) {
                 return;
             }
 
-            // 🌟 ආරක්ෂිතව දත්ත map කිරීම
+           
             const formattedProducts = itemsInCart.map(item => ({
                 productId: item.product?.productId || item.productId,
                 quantity: item.quantity

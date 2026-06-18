@@ -4,9 +4,9 @@ import { IoIosAdd } from "react-icons/io";
 import { FiChevronLeft, FiChevronRight, FiEye } from "react-icons/fi";
 import axios from "axios";
 import toast from "react-hot-toast";
-import OrderDetailsModal from "../../components/orderDetailModel";
+import OrderDetailsModal from "../components/orderDetailModel";
 
-export default function AdminOrdersPage() {
+export default function MyOrdersPage() {
 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -231,19 +231,13 @@ export default function AdminOrdersPage() {
                 </div>
             )}
 
-            {/* <OrderDetailsModal 
-                order={selectedOrder} 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
-            /> */}
-          
+           
             <OrderDetailsModal
                 order={selectedOrder}
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                isAdminView={true} // 👈 🌟 ඇඩ්මින්ට Edit කරන්න පුළුවන් වෙන්න මෙතන true දාන්න!
+                isAdminView={false} // 👈 🌟 මෙන්න මේ Prop එක false නිසා යූසර්ට කිසිම දෙයක් edit කරන්න බැහැ!
             />
-
             {/* Floating Plus Button */}
             <Link to="/admin/add-product" className="fixed bottom-8 right-8 w-16 h-16 bg-accent rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:bg-accent/80 transition-all duration-200 z-20">
                 <IoIosAdd className="text-white text-3xl" />

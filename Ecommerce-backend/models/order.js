@@ -48,6 +48,10 @@ const orderSchema = new mongoose.Schema(
             required: true,
             default: "pending"
         },
+        notes:{
+            type: String,
+            required: false
+        },
         total: {
             type: Number,
             required: true

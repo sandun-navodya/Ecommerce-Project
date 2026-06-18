@@ -146,3 +146,36 @@ export async function getOrders(req, res) {
         });
     }
 }
+
+export async function updateOrderStatus(req, res) {
+    if(req.user && req.user.isAdmin) {
+        try {
+            const order = await Order.findOne({ orderId: req.params.orderId });
+
+            if (!order) {
+                return res.status(404).json({
+                    message: "Order not found"
+                });
+            }
+
+            order.status = req.body.status;
+            order.notes = req.body.notes || order.notes; 
+            await order.save();
+
+            res.status(200).json({
+                message: "Order status updated successfully",
+                order: order
+            });
+        } catch (error) {
+            console.error("Error occurred while updating order status:", error);
+            res.status(500).json({
+                message: "An error occurred while updating order status",
+                error: error.message
+            });
+        }
+    } else {
+        return res.status(403).json({
+            message: "Only admins can update order status"
+        });
+    }
+}

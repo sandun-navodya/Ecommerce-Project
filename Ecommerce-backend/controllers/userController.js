@@ -1,7 +1,7 @@
 import User from '../models/user.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';    
+import dotenv from 'dotenv';
 dotenv.config();
 
 export async function createUser(req, res) {
@@ -30,6 +30,79 @@ export async function createUser(req, res) {
 
 
 }
+
+export async function getUsers(req, res) {
+
+    if (req.user == null) {
+        res.status(401).json({
+            message: "Unauthorized"
+        })
+    } else {
+        res.status(200).json({
+            message: "User details fetched successfully",
+            user: req.user
+        })
+    }
+}
+
+export async function updateUserData(req, res) {
+    if (req.user == null) {
+        res.status(401).json({
+            message: "Unauthorized"
+        })
+    } else {
+        try {
+            const user = await User.findOneAndUpdate(
+                { email: req.user.email },
+                { firstname: req.body.firstname, lastname: req.body.lastname, image: req.body.image },
+                // { new: true }
+            );
+
+            const updatedUser = await User.findOne({ email: req.user.email });
+            const tokenPayload = {
+                email: updatedUser.email,
+                firstname: updatedUser.firstname,
+                lastname: updatedUser.lastname,
+                isAdmin: updatedUser.isAdmin,
+                isBlocked: updatedUser.isBlocked,
+                isEmailVerified: updatedUser.isEmailVerified,
+                image: updatedUser.image
+            };
+
+            const token = jwt.sign(tokenPayload, process.env.tokenSecret, { expiresIn: "48h" });
+
+            res.json({
+                message: "User data updated successfully",
+                token: token
+            })
+        } catch (err) {
+            res.status(500).json({
+                message: "Error updating user data",
+                error: err.message
+            })
+        }
+    }
+}
+
+export async function updatePassword(req, res) {
+    if (req.user == null) {
+        res.status(401).json({
+            message: "Unauthorized"
+        })
+    }
+    else {
+        await User.findOneAndUpdate(
+            { email: req.user.email },
+            { password: bcrypt.hashSync(req.body.password, 10) }
+        );
+        res.json({
+            message: "Password updated successfully"
+        })
+    }
+}
+
+
+
 
 export async function loginUser(req, res) {
     try {
