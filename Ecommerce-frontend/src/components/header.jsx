@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getCart } from "./utils/cart";
-import UserData from "../components/userData"; // 🌟 ඔයාගේ හදපු අලුත් Component එක මෙතනට Import කරගන්න
+import UserData from "../components/userData"; 
 
 export default function Header() {
   const [cartCount, setCartCount] = useState(0);
@@ -32,7 +32,7 @@ export default function Header() {
           <img src="/logo.png" alt="Logo" className="h-11 sm:h-14 w-auto" />
         </Link>
 
-        {/* Navigation Links - Center (Mobile වලදී සැඟවේ) */}
+        {/* Navigation Links - Center */}
         <div className="hidden md:flex flex-1 items-center justify-center gap-8">
           <Link to="/" className="text-white hover:text-gray-300 transition font-medium text-lg">Home</Link>
           <Link to="/products" className="text-white hover:text-gray-300 transition font-medium text-lg">Products</Link>
@@ -61,8 +61,8 @@ export default function Header() {
             )}
           </Link>
 
-          {/* 🌟 මෙන්න මෙතනට ඔයාගේ අලුත් Component එක ප්ලග් කළා */}
-          <UserData />
+          {/* Desktop Dropdown Component Variant */}
+          <UserData isMobile={false} />
 
         </div>
       </div>

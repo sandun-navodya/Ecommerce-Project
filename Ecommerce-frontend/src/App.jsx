@@ -15,15 +15,18 @@ import toast from 'react-hot-toast' // 🌟 toast import කළා
 import BottomNavbar from './components/bottomNavbar'
 import MyOrdersPage from './pages/myOrders'
 import SettingsPage from './pages/settingsPage'
+import UserRegisterPage from './pages/userRegisterPage' // 🌟 UserRegisterPage import කළා
 
-// 🌟 1. ඇඩ්මින්ලා විතරක් ඇතුළට ගන්නා ආරක්ෂක පවුර (Admin Route Guard)
+
+
+// 687394219055-e7tke2bpvknn257hbqf9t7gg50d8eilk.apps.googleusercontent.com
 const AdminRoute = ({ children }) => {
   const token = localStorage.getItem("token");
-  // Login වෙද්දී localStorage එකට දාපු isAdmin flag එක කියවීම
-  const isAdmin = localStorage.getItem("isAdmin") === "true"; 
+
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   if (!token || !isAdmin) {
-    // ඇඩ්මින් කෙනෙක් නොවී හොරෙන් එන්න හැදුවොත් Error එකක් දමා Login පේජ් එකට පන්නනවා
+
     setTimeout(() => toast.error("Access Denied: Admins Only!"), 100);
     return <Navigate to="/login" replace />;
   }
@@ -33,119 +36,144 @@ const AdminRoute = ({ children }) => {
 
 function App() {
   return (
-    <div className="w-full h-screen flex flex-col bg-primary text-secondary">
-      <Toaster position="top-right"/>
-      
-      <Routes>
-        {/* Pages with Header - Header persists, content changes */}
-        <Route 
-          path="/" 
-          element={
-            <div className="flex flex-col h-full overflow-hidden">
-              <Header />
-              <div className="flex-1 overflow-y-auto">
-                <HomePage />
-              </div>
-            </div>
-          } 
-        />
-        <Route 
-          path="/products" 
-          element={
-            <div className="flex flex-col h-full overflow-hidden">
-              <Header />
-              <div className="flex-1 overflow-y-auto">
-                <ProductsPage />
-              </div>
-            </div>
-          } 
-        />
-        <Route 
-          path="/products/:productId" 
-          element={
-            <div className="flex flex-col h-full overflow-hidden">
-              <Header />
-              <div className="flex-1 overflow-y-auto">
-                <ProductDetailPage />
-              </div>
-            </div>
-          } 
-        />
-        <Route 
-          path="/contact" 
-          element={
-            <div className="flex flex-col h-full overflow-hidden">
-              <Header />
-              <div className="flex-1 overflow-y-auto">
-                <ContactPage />
-              </div>
-            </div>
-          } 
-        />
-        <Route 
-          path="/cart" 
-          element={
-            <div className="flex flex-col h-full overflow-hidden">
-              <Header />
-              <div className="flex-1 overflow-y-auto">
-                <CartPage />
-              </div>
-            </div>
-          } 
-        />
+    
+      <div className="w-full h-screen flex flex-col bg-primary text-secondary">
+        <Toaster position="top-right" />
 
-        <Route 
-          path="/checkout" 
-          element={
-            <div className="flex flex-col h-full overflow-hidden">
-              <Header />
-              <div className="flex-1 overflow-y-auto">
-                <CheckoutPage />
+        <Routes>
+          {/* Pages with Header - Header persists, content changes */}
+          <Route
+            path="/"
+            element={
+              <div className="flex flex-col h-full overflow-hidden">
+                <Header />
+                <div className="flex-1 overflow-y-auto">
+                  <HomePage />
+                </div>
               </div>
-            </div>
-          } 
-        />
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              <div className="flex flex-col h-full overflow-hidden">
+                <Header />
+                <div className="flex-1 overflow-y-auto">
+                  <ProductsPage />
+                </div>
+              </div>
+            }
+          />
+          <Route
+            path="/products/:productId"
+            element={
+              <div className="flex flex-col h-full overflow-hidden">
+                <Header />
+                <div className="flex-1 overflow-y-auto">
+                  <ProductDetailPage />
+                </div>
+              </div>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <div className="flex flex-col h-full overflow-hidden">
+                <Header />
+                <div className="flex-1 overflow-y-auto">
+                  <ContactPage />
+                </div>
+              </div>
+            }
+          />
+          <Route
+            path="/cart"
+            element={
+              <div className="flex flex-col h-full overflow-hidden">
+                <Header />
+                <div className="flex-1 overflow-y-auto">
+                  <CartPage />
+                </div>
+              </div>
+            }
+          />
 
-        <Route 
-          path="/my-orders" 
-          element={
-            <div className="flex flex-col h-full overflow-hidden">
-              <Header />
-              <div className="flex-1 overflow-y-auto">
-                <MyOrdersPage />
+          <Route
+            path="/checkout"
+            element={
+              <div className="flex flex-col h-full overflow-hidden">
+                <Header />
+                <div className="flex-1 overflow-y-auto">
+                  <CheckoutPage />
+                </div>
               </div>
-            </div>
-          } 
-        />
+            }
+          />
 
-        <Route 
-          path="/settings" 
-          element={
-            <div className="flex flex-col h-full overflow-hidden">
-              <Header />
-              <div className="flex-1 overflow-y-auto">
-              <SettingsPage />
+          <Route
+            path="/my-orders"
+            element={
+              <div className="flex flex-col h-full overflow-hidden">
+                <Header />
+                <div className="flex-1 overflow-y-auto">
+                  <MyOrdersPage />
+                </div>
               </div>
-            </div>
-          } 
-        />
-      
-        {/* Pages without Header */}
-        {/* 🌟 2. වෙනස් කළ ස්ථානය: AdminPage එක ආරක්ෂක පවුර (AdminRoute) මැදට දැමීම */}
-        <Route 
-          path="/admin/*" 
-          element={
-            <AdminRoute>
-              <AdminPage />
-            </AdminRoute>
-          } 
-        />
-        
-        <Route path="/test/*" element={<Test />} />
-        <Route path="/login" element={<LoginPage />} />
-      </Routes>
-      <BottomNavbar />
-    </div>
+            }
+          />
+
+          <Route
+            path="/settings"
+            element={
+              <div className="flex flex-col h-full overflow-hidden">
+                <Header />
+                <div className="flex-1 overflow-y-auto">
+                  <SettingsPage />
+                </div>
+              </div>
+            }
+          />
+
+          <Route
+            path="/login"
+            element={
+              <div className="flex flex-col h-full overflow-hidden">
+                <Header />
+                <div className="flex-1 overflow-y-auto">
+                  <LoginPage />
+                </div>
+              </div>
+            }
+          />
+
+          <Route
+            path="/Register"
+            element={
+              <div className="flex flex-col h-full overflow-hidden">
+                <Header />
+                <div className="flex-1 overflow-y-auto">
+                  <UserRegisterPage />
+                </div>
+              </div>
+            }
+          />
+
+          {/* Admin Route - Protected */}
+          <Route
+            path="/admin/*"
+            element={
+              <AdminRoute>
+                <AdminPage />
+              </AdminRoute>
+            }
+          />
+
+          <Route path="/test/*" element={<Test />} />
+
+        </Routes>
+        <BottomNavbar />
+      </div>
+   
   )
 }
 
